@@ -78,8 +78,34 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     # The following line can be used to set a custom config file, stored in the local config folder
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
+    AIRFLOW__DAG_PROCESSOR__DAG_BUNDLE_CONFIG_LIST: |
+      [
+        {
+          "name": "dags-folder",
+          "classpath": "airflow.dag_processing.bundles.local.LocalDagBundle",
+          "kwargs": {}
+        },
+        {
+          "name": "other-folder",
+          "classpath": "airflow.dag_processing.bundles.local.LocalDagBundle",
+          "kwargs": {
+            "path": "/opt/airflow/other_dags"
+          }
+        },
+        {
+          "name": "my_git_repo",
+          "classpath": "airflow.providers.git.bundles.git.GitDagBundle",
+          "kwargs": {
+            "subdir": "dags",
+            "tracking_ref": "sample-hashicorp-vault",
+            "git_conn_id": "my_git_conn",
+            "repo_url": "https://github.com/lifnaja/data-orchestration-with-apache-airflow.git"
+          }
+      }
+      ]
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR:-.}/other_dags:/opt/airflow/other_dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
